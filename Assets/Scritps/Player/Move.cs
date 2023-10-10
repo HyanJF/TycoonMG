@@ -6,12 +6,14 @@ public class Move : MonoBehaviour
 {
     //Variables publicas
     public Transform cameraAim;
-    public float walkSpeed, runSpeed, rotationSpeed;
+    public float walkSpeed, runSpeed, rotationSpeed, jumpForce;
     public bool canMove;
+    public GroundDetector groundDetector;
 
     //Variables privadas
-    private Vector3 vectorMovement;
+    private Vector3 vectorMovement, verticalForce;
     private float speed;
+    private bool isGrounded;
     private CharacterController characterController;
 
     // Start is called before the first frame update
@@ -30,8 +32,10 @@ public class Move : MonoBehaviour
             Walk();
             Run();
             AlignPlayer();
+            Jump();
         }
         Gravity();
+        CheckGround();
     }
 
     // Funcion para caminar
@@ -67,10 +71,30 @@ public class Move : MonoBehaviour
         }
     }
 
+    void Jump()
+    {
+        // Si estamos tocando el suelo y precionamos espacio
+        if(isGrounded && Input.GetAxis("Jump") > 0f)
+        {
+            verticalForce = new Vector3(0f, jumpForce, 0f);
+            isGrounded = false;
+        }
+    }
+
     // Funcion provicional de gravedad
     void Gravity()
     {
-        characterController.Move(new Vector3(0f, -4f * Time.deltaTime, 0f));
+        // Si no estamos tocando el suelo
+        if(!isGrounded)
+        {
+            verticalForce += Physics.gravity * Time.deltaTime;
+        }
+        else
+        {
+            verticalForce = new Vector3(0f, -2f, 0f);
+        }
+        // Aplicar la fuerza vertical
+        characterController.Move(verticalForce * Time.deltaTime);
     }
     // Alinear con el player
     void AlignPlayer()
@@ -80,5 +104,11 @@ public class Move : MonoBehaviour
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(vectorMovement), rotationSpeed * Time.deltaTime);
         }
+    }
+
+    // Funcion para conseguir el valor de isGrounded del detector
+    void CheckGround()
+    {
+        isGrounded = groundDetector.GetIsGrounded();
     }
 }

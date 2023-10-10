@@ -22,7 +22,7 @@ public class Conveyor : MonoBehaviour
     // Update is called once per frame
     private void OnCollisionStay(Collision collision)
     {
-        if(collision.gameObject.CompareTag("Resource"))
+        if(collision.gameObject.CompareTag("Resource") || collision.gameObject.CompareTag("Player"))
         {
             Transform collidedObject = collision.gameObject.transform;
             collidedObject.position = new Vector3(collidedObject.position.x + movementVector.x * Time.deltaTime, 
